@@ -1,9 +1,8 @@
-
 from flask import Flask, render_template, request
 from requests.auth import HTTPBasicAuth
 from collections import defaultdict
 import requests
-
+from datetime import datetime
 app = Flask(__name__)
 
 
@@ -51,18 +50,26 @@ def index():
                 hours = wl["timeSpentSeconds"] / 3600
                 worklog_summary[started][f"{issue_key} - {summary}"] += hours
 
-        data = []
-        for date in sorted(worklog_summary.keys()):
-            activities = [
-                {'issue': issue, 'time': format_hours_minutes(hrs)}
-                for issue, hrs in worklog_summary[date].items()
-            ]
-            total = format_hours_minutes(sum(worklog_summary[date].values()))
-            data.append({'date': date, 'activities': activities, 'total': total})
+        # Coletar todas as datas
+        all_dates = sorted(worklog_summary.keys())
 
-        return render_template("dashboard.html", email=email, data=data)
+        # Reorganiza os dados por atividade → data → horas
+        pivot_data = defaultdict(dict)
+        for date in all_dates:
+            for issue, hrs in worklog_summary[date].items():
+                pivot_data[issue][date] = format_hours_minutes(hrs)
 
+        return render_template("dashboard.html", email=email, pivot_data=pivot_data, all_dates=all_dates)
 
     return render_template("index.html")
+
+
+@app.template_filter('datetimeformat')
+def datetimeformat(value, format='%d/%m/%Y'):
+    try:
+        return datetime.strptime(value, '%Y-%m-%d').strftime(format)
+    except:
+        return value
+
 if __name__ == '__main__':
     app.run(debug=True)

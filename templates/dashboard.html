@@ -10,22 +10,30 @@
     <h2>Dashboard de Atividades</h2>
     <p><strong>E-mail:</strong> {{ email }}</p>
 
-    {% for dia in data %}
-    <div class="card mb-3">
-        <div class="card-header bg-primary text-white">
-            {{ dia.date }} — Total: {{ dia.total }}
-        </div>
-        <ul class="list-group list-group-flush">
-            {% for atividade in dia.activities %}
-            <li class="list-group-item">
-                <a href="https://cooxupe-projetos.atlassian.net/browse/{{ atividade.issue.split(' - ')[0] }}" target="_blank">
-                    {{ atividade.issue }}
-                </a>: {{ atividade.time }}
-            </li>
+    <table class="table table-bordered table-striped mt-4">
+        <thead class="table-dark">
+        <tr>
+            <th>Atividade</th>
+            {% for date in all_dates %}
+            <th>{{ date | datetimeformat }}</th>
             {% endfor %}
-        </ul>
-    </div>
-    {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for atividade, dias in pivot_data.items() %}
+        <tr>
+            <td>
+                <a href="https://cooxupe-projetos.atlassian.net/browse/{{ atividade.split(' - ')[0] }}" target="_blank">
+                    {{ atividade }}
+                </a>
+            </td>
+            {% for date in all_dates %}
+            <td>{{ dias.get(date, '') }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </div>
 </body>
 </html>

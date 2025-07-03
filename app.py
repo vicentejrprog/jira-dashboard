@@ -30,7 +30,8 @@ def index():
         base_url = f"https://{domain}/rest/api/3"
         search_url = f"{base_url}/search"
 
-        jql = f"worklogAuthor = currentUser() AND worklogDate >= {data_inicio} AND worklogDate <= {data_fim}"
+        jql = f'worklogAuthor = "{email}" AND worklogDate >= {data_inicio} AND worklogDate <= {data_fim}'
+
 
         query_params = {
             "jql": jql,

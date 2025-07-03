@@ -2,7 +2,8 @@ from flask import Flask, render_template, request
 from requests.auth import HTTPBasicAuth
 from collections import defaultdict
 import requests
-from datetime import datetime, timedelta  # adicionado timedelta
+import os
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
@@ -15,7 +16,7 @@ def format_hours_minutes(hours_float):
 def index():
     if request.method == 'POST':
         email = request.form.get('email', '')
-        api_token = request.form.get('api', '')
+        api_token = os.getenv("JIRA_API_TOKEN")  # 🔐 agora vindo da variável de ambiente
         data_inicio_raw = request.form.get('data_inicio', '')
         data_fim_raw = request.form.get('data_fim', '')
 
@@ -81,7 +82,7 @@ def index():
             daily_totals=daily_totals
         )
 
-    # Parte do GET → calcular datas padrão
+    # GET padrão com datas já preenchidas
     hoje = datetime.today()
     sete_dias_atras = hoje - timedelta(days=7)
     data_inicio = sete_dias_atras.strftime('%Y-%m-%d')

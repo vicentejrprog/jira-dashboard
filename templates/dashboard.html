@@ -33,6 +33,14 @@
         </tr>
         {% endfor %}
         </tbody>
+        <tfoot>
+        <tr class="table-secondary">
+            <th>Total</th>
+            {% for date in all_dates %}
+            <th>{{ daily_totals.get(date, '') }}</th>
+            {% endfor %}
+        </tr>
+        </tfoot>
     </table>
 </div>
 </body>

@@ -15,8 +15,9 @@ def format_hours_minutes(hours_float):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        email = request.form.get('email', '')
-        api_token = os.getenv("JIRA_API_TOKEN")  # 🔐 agora vindo da variável de ambiente
+        user_email = request.form.get('email', '')  # E-mail do usuário que está sendo consultado
+        admin_email = os.getenv("JIRA_ADMIN_EMAIL")  # E-mail da Amanda (administradora)
+        api_token = os.getenv("JIRA_API_TOKEN")      # Token da Amanda
         data_inicio_raw = request.form.get('data_inicio', '')
         data_fim_raw = request.form.get('data_fim', '')
 
@@ -30,15 +31,15 @@ def index():
         base_url = f"https://{domain}/rest/api/3"
         search_url = f"{base_url}/search"
 
-        jql = f'worklogAuthor = "{email}" AND worklogDate >= {data_inicio} AND worklogDate <= {data_fim}'
-
+        jql = f'worklogAuthor = "{user_email}" AND worklogDate >= {data_inicio} AND worklogDate <= {data_fim}'
 
         query_params = {
             "jql": jql,
             "fields": "summary"
         }
 
-        response = requests.get(search_url, auth=HTTPBasicAuth(email, api_token), params=query_params)
+        # 🔐 A autenticação sempre é feita com o e-mail e token da Amanda
+        response = requests.get(search_url, auth=HTTPBasicAuth(admin_email, api_token), params=query_params)
         if response.status_code != 200:
             return f"Erro ao buscar tarefas: {response.status_code} - {response.text}"
 
@@ -50,12 +51,12 @@ def index():
             summary = issue["fields"]["summary"]
             worklog_url = f"{base_url}/issue/{issue_key}/worklog"
 
-            wl_response = requests.get(worklog_url, auth=HTTPBasicAuth(email, api_token))
+            wl_response = requests.get(worklog_url, auth=HTTPBasicAuth(admin_email, api_token))
             if wl_response.status_code != 200:
                 continue
 
             for wl in wl_response.json().get("worklogs", []):
-                if wl["author"].get("emailAddress") != email:
+                if wl["author"].get("emailAddress") != user_email:
                     continue
 
                 started = wl["started"][:10]
@@ -77,7 +78,7 @@ def index():
 
         return render_template(
             "dashboard.html",
-            email=email,
+            email=user_email,
             pivot_data=pivot_data,
             all_dates=all_dates,
             daily_totals=daily_totals

@@ -32,7 +32,7 @@ def index():
         search_url = f"{base_url}/search"
 
         # JQL atualizado: buscar por atualização recente, sem filtrar por autor
-        jql = f'updated >= {data_inicio} AND updated <= {data_fim}'
+        jql = f'worklogDate >= "{data_inicio}" AND worklogDate <= "{data_fim}"'
 
         query_params = {
             "jql": jql,

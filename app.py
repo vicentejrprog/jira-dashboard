@@ -31,14 +31,14 @@ def index():
         base_url = f"https://{domain}/rest/api/3"
         search_url = f"{base_url}/search"
 
-        jql = f'worklogAuthor = "{user_email}" AND worklogDate >= {data_inicio} AND worklogDate <= {data_fim}'
+        # JQL atualizado: buscar por atualização recente, sem filtrar por autor
+        jql = f'updated >= {data_inicio} AND updated <= {data_fim}'
 
         query_params = {
             "jql": jql,
             "fields": "summary"
         }
 
-        # 🔐 A autenticação sempre é feita com o e-mail e token da Amanda
         response = requests.get(search_url, auth=HTTPBasicAuth(admin_email, api_token), params=query_params)
         if response.status_code != 200:
             return f"Erro ao buscar tarefas: {response.status_code} - {response.text}"
